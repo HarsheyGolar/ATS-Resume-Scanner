@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Ultra-premium AI-powered ATS resume scanner. See your resume through an ATS lens with cinematic analysis.">
+    <title>SkillLens AI — See Your Resume Through an ATS Lens</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/styles.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body>
+    <!-- Hero Section -->
+    <div class="sl-hero">
+        <div class="sl-brand-badge">
+            AI-Powered Resume Analysis
+        </div>
+        
+        <div class="sl-logo-container">
+            <img src="{{ url_for('static', filename='assets/img/logo.png') }}" 
+                 alt="SkillLens AI Logo" 
+                 width="150" height="150"
+                 style="aspect-ratio: 1/1; object-fit: contain;"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" />
+            <h1 class="sl-logo-fallback" style="display: none; font-size: 3rem; margin: 0;">SkillLens</h1>
+        </div>
+        
+        <h1 class="sl-hero-title">SkillLens AI</h1>
+        
+        <p class="sl-hero-subtitle">
+            See Your Resume Through an ATS Lens
+        </p>
+    </div>
+
+    <div class="container">
+        <!-- Upload Form -->
+        <form id="analyzeForm" enctype="multipart/form-data">
+            <div class="sl-grid">
+                <!-- Resume Upload -->
+                <div class="sl-input-group">
+                    <label>Upload Resume</label>
+                    <div class="sl-upload-card" id="uploadCard">
+                        <div class="sl-upload-icon">📄</div>
+                        <h3 id="uploadText">Drop your resume here</h3>
+                        <p class="sl-upload-subtext">PDF, DOCX, TXT, PNG, or JPG • Max 16MB</p>
+                        <input type="file" name="resume_file" id="resumeFile" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg" required style="display: none;">
+                        <button type="button" class="sl-choose-file-btn" id="chooseFileBtn">Choose file</button>
+                        <div class="sl-scan-line"></div>
+                    </div>
+                </div>
+
+                <!-- Job Description -->
+                <div class="sl-input-group">
+                    <label for="jdText">Job Description</label>
+                    <div class="sl-textarea-wrapper">
+                        <textarea name="jd_text" id="jdText" rows="12" required placeholder="Paste the job description here..."></textarea>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; margin-top: 8px;">
+                        <div class="sl-char-counter" id="charCounter" style="position: static; font-size: 0.85rem; color: var(--sl-text-secondary);">Characters: 0 / 3000</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Warning Section (Inline Errors) -->
+            <div id="warningSection" style="display: none; margin-top: var(--sl-space-6); padding: var(--sl-space-4); background: rgba(255, 170, 0, 0.1); border: 1px solid rgba(255, 170, 0, 0.3); border-radius: var(--sl-radius-md); color: #ffaa00;"></div>
+
+            <!-- Analyze Button -->
+            <div style="text-align: center; margin-top: var(--sl-space-10);">
+                <button type="submit" class="sl-btn-primary" id="analyzeBtn">
+                    <span class="sl-btn-text">🔍 Analyze Resume</span>
+                    <div class="sl-spinner"></div>
+                </button>
+            </div>
+        </form>
+
+        <!-- Loading State -->
+        <div id="loading" style="display: none;">
+            <div class="sl-loading-container">
+                <div class="sl-spinner-large"></div>
+                <h3 class="sl-loading-title">Analyzing Resume</h3>
+                <p class="sl-loading-text">Our AI is parsing your skills and matching them against the job description...</p>
+                <div class="sl-progress-bar">
+                    <div class="sl-progress-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results" style="display: none;">
+            <div class="sl-divider"></div>
+            
+            <div class="sl-results-grid">
+                <!-- ATS Score Circle -->
+                <div id="scoreSection" class="sl-results-card sl-card-score" data-animate></div>
+
+                <!-- Category Scores -->
+                <div class="sl-results-card sl-card-categories" data-animate>
+                    <div class="sl-card-header">
+                        <div class="sl-icon-box">📊</div>
+                        <h3>Category Analysis</h3>
+                    </div>
+                    <div id="categoryScores" class="sl-categories-grid"></div>
+                </div>
+            </div>
+
+            <div class="sl-results-grid-secondary">
+                <!-- Matched Skills (New) -->
+                <div id="matchedSkillsSection" class="sl-results-card" data-animate></div>
+
+                <!-- Missing Skills -->
+                <div id="missingSkillsSection" class="sl-results-card" data-animate></div>
+
+                <!-- Suggestions -->
+                <div id="suggestionsSection" class="sl-results-card" data-animate></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='assets/js/animations.js') }}"></script>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════════════════════
+        // CORE APPLICATION LOGIC
+        // ═══════════════════════════════════════════════════════════════════════════
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const uploadCard = document.getElementById('uploadCard');
+            const fileInput = document.getElementById('resumeFile');
+            const chooseFileBtn = document.getElementById('chooseFileBtn');
+            const uploadText = document.getElementById('uploadText');
+            const jdTextarea = document.getElementById('jdText');
+            const charCounter = document.getElementById('charCounter');
+            const analyzeForm = document.getElementById('analyzeForm');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const loadingSection = document.getElementById('loading');
+            const resultsSection = document.getElementById('results');
+
+            // 1️⃣ DRAG & DROP & FILE UPLOAD LOGIC
+            // -----------------------------------------------------------------------
+            
+            // Handle "Choose file" button click
+            chooseFileBtn.addEventListener('click', (e) => {
+                e.preventDefault(); // Prevent any form submission
+                e.stopPropagation(); // Stop bubbling
+                fileInput.click();
+            });
+
+            // Handle file selection via system dialog
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length) {
+                    handleFileSelection(e.target.files[0]);
+                }
+            });
+
+            // Drag & Drop Events
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadCard.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadCard.addEventListener(eventName, () => {
+                    uploadCard.classList.add('dragging');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadCard.addEventListener(eventName, () => {
+                    uploadCard.classList.remove('dragging');
+                }, false);
+            });
+
+            uploadCard.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files.length) {
+                    fileInput.files = files;
+                    handleFileSelection(files[0]);
+                }
+            });
+
+            function handleFileSelection(file) {
+                // Update UI to show selected file
+                uploadCard.classList.add('file-selected');
+                
+                // Update text
+                uploadText.innerHTML = `
+                    <span style="display: block; margin-bottom: 4px;">File Selected:</span>
+                    <span style="color: var(--sl-cyan-400); word-break: break-all;">${file.name}</span>
+                `;
+                
+                // Update icon
+                const icon = uploadCard.querySelector('.sl-upload-icon');
+                icon.innerHTML = '✅';
+                
+                // Add success animation class
+                icon.classList.add('pulse-success');
+                
+                // Change button text
+                chooseFileBtn.textContent = 'Change File';
+            }
+
+            // 2️⃣ CHARACTER COUNTER LOGIC
+            // -----------------------------------------------------------------------
+            function updateCharCounter() {
+                const currentLength = jdTextarea.value.length;
+                const maxLength = 3000;
+                
+                charCounter.textContent = `Characters: ${currentLength} / ${maxLength}`;
+                
+                // Visual feedback for limits
+                if (currentLength >= maxLength) {
+                    charCounter.style.color = 'var(--sl-error)';
+                    jdTextarea.style.borderColor = 'var(--sl-error)';
+                } else if (currentLength >= maxLength * 0.9) {
+                    charCounter.style.color = 'var(--sl-warning)';
+                    jdTextarea.style.borderColor = 'var(--sl-warning)';
+                } else {
+                    charCounter.style.color = 'var(--sl-text-tertiary)';
+                    jdTextarea.style.borderColor = 'var(--sl-glass-border)';
+                }
+            }
+
+            jdTextarea.addEventListener('input', updateCharCounter);
+            
+            // Function to update analyze button state
+            function updateAnalyzeButtonState() {
+                const hasFile = fileInput.files.length > 0;
+                const jdLength = jdTextarea.value.trim().length;
+                // Allow button to be enabled if file is selected and JD has any text
+                // Backend will handle validation and show warnings for short text
+                const hasValidJd = jdLength > 0;
+                
+                analyzeBtn.disabled = !(hasFile && hasValidJd);
+                
+                // Update button appearance based on state
+                if (analyzeBtn.disabled) {
+                    analyzeBtn.style.opacity = '0.6';
+                    analyzeBtn.style.cursor = 'not-allowed';
+                } else {
+                    analyzeBtn.style.opacity = '1';
+                    analyzeBtn.style.cursor = 'pointer';
+                }
+            }
+            
+            // Add event listeners for button state
+            fileInput.addEventListener('change', updateAnalyzeButtonState);
+            jdTextarea.addEventListener('input', updateAnalyzeButtonState);
+            
+            // Initialize on load
+            updateCharCounter();
+            updateAnalyzeButtonState();
+
+            // 3️⃣ FORM SUBMISSION & ANALYSIS
+            // -----------------------------------------------------------------------
+            const warningSection = document.getElementById('warningSection');
+
+            function showWarning(message, type='warning') {
+                warningSection.style.display = 'block';
+                warningSection.innerHTML = `
+                    <div style="display: flex; align-items: start; gap: 10px;">
+                        <span style="font-size: 1.2em; line-height: 1.4;">${type === 'error' ? '❌' : '⚠️'}</span>
+                        <p style="margin: 0; font-size: 0.95rem; line-height: 1.5;">${message}</p>
+                    </div>
+                `;
+                if (type === 'error') {
+                     warningSection.style.background = 'rgba(239, 68, 68, 0.1)';
+                     warningSection.style.color = 'var(--sl-error)';
+                     warningSection.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                } else {
+                     warningSection.style.background = 'rgba(255, 170, 0, 0.1)';
+                     warningSection.style.color = '#ffaa00';
+                     warningSection.style.borderColor = 'rgba(255, 170, 0, 0.3)';
+                }
+            }
+
+            analyzeForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                warningSection.style.display = 'none';
+                
+                // Validate inputs
+                if (!fileInput.files.length) {
+                    showWarning('Please upload a resume first.', 'error');
+                    return;
+                }
+                if (!jdTextarea.value.trim()) {
+                    showWarning('Please enter a job description.', 'error');
+                    return;
+                }
+                            
+                // Note: Backend will handle validation and show warnings for short text
+                // We allow submission here and let backend provide non-blocking warnings
+
+                // UI Loading State
+                analyzeBtn.disabled = true;
+                analyzeBtn.classList.add('loading');
+                loadingSection.style.display = 'flex'; // Flex for centering
+                resultsSection.style.display = 'none';
+                
+                // Smooth scroll to loading
+                loadingSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                const formData = new FormData(e.target);
+
+                try {
+                    const response = await fetch('/analyze', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (!response.ok) {
+                        // Handle error responses (like 400 status)
+                        throw new Error(data.error || 'An error occurred during analysis');
+                    }
+                    
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+
+                    // Show non-blocking warnings if any
+                    if (data.warnings && data.warnings.length > 0) {
+                        showWarning(data.warnings.join('<br>'));
+                    }
+                    
+                    // Render Results
+                    renderResults(data);
+                    
+                    // Hide loading, show results
+                    loadingSection.style.display = 'none';
+                    resultsSection.style.display = 'block';
+                    
+                    // Scroll to results
+                    resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    
+                } catch (error) {
+                    // Check if it's a structured error response from backend
+                    if (error.message && error.message.includes('OCR support')) {
+                        showWarning(error.message, 'error');
+                        loadingSection.style.display = 'none';
+                        resultsSection.style.display = 'none';
+                    } else {
+                        showWarning(error.message, 'error');
+                        loadingSection.style.display = 'none';
+                    }
+                } finally {
+                    analyzeBtn.disabled = false;
+                    analyzeBtn.classList.remove('loading');
+                }
+            });
+
+            // 4️⃣ RENDER RESULTS (PREMIUM UI)
+            // -----------------------------------------------------------------------
+            function renderResults(data) {
+                // --- ATS Score ---
+                const score = Math.round(data.ats_score);
+                const circumference = 2 * Math.PI * 90;
+                const offset = circumference - (score / 100) * circumference;
+                
+                let scoreColor = '#ef4444'; // Red
+                let scoreText = 'Needs Improvement';
+                
+                if (score >= 70) { scoreColor = '#22c55e'; scoreText = 'Strong Match'; }
+                else if (score >= 50) { scoreColor = '#84cc16'; scoreText = 'Good Match'; }
+                else if (score >= 30) { scoreColor = '#f59e0b'; scoreText = 'Below Average'; }
+
+                const scoreHtml = `
+                    <div class="sl-score-container">
+                        <svg class="sl-score-ring" width="200" height="200" viewBox="0 0 200 200">
+                            <defs>
+                                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#8b5cf6" />
+                                    <stop offset="100%" stop-color="#06b6d4" />
+                                </linearGradient>
+                            </defs>
+                            <circle class="sl-score-bg" cx="100" cy="100" r="90"></circle>
+                            <circle class="sl-score-progress" cx="100" cy="100" r="90" 
+                                style="stroke-dasharray: ${circumference}; stroke-dashoffset: ${circumference}; stroke: ${scoreColor};">
+                            </circle>
+                        </svg>
+                        <div class="sl-score-content">
+                            <span class="sl-score-number" id="animatedScore">0%</span>
+                            <span class="sl-score-label">Match Rate</span>
+                        </div>
+                    </div>
+                    <div class="sl-score-status" style="color: ${scoreColor}">
+                        ${scoreText}
+                    </div>
+                `;
+                document.getElementById('scoreSection').innerHTML = scoreHtml;
+                
+                // Animate Score Number
+                animateValue("animatedScore", 0, score, 1500);
+                
+                // Animate Ring (via timeout to allow DOM render)
+                setTimeout(() => {
+                    const progressCircle = document.querySelector('.sl-score-progress');
+                    if(progressCircle) {
+                        progressCircle.style.strokeDashoffset = offset;
+                    }
+                }, 100);
+
+                // --- Category Scores ---
+                let categoryHTML = '';
+                for (const [category, val] of Object.entries(data.category_scores)) {
+                    const barColor = val >= 70 ? 'var(--sl-success)' : (val >= 40 ? 'var(--sl-warning)' : 'var(--sl-error)');
+                    
+                    categoryHTML += `
+                        <div class="sl-category-item">
+                            <div class="sl-category-header">
+                                <span class="sl-category-name">${category}</span>
+                                <span class="sl-category-value">${Math.round(val)}%</span>
+                            </div>
+                            <div class="sl-category-bar-bg">
+                                <div class="sl-category-bar-fill" style="width: 0%; background: ${barColor}" data-width="${val}%"></div>
+                            </div>
+                        </div>
+                    `;
+                }
+                document.getElementById('categoryScores').innerHTML = categoryHTML;
+                
+                // Animate Category Bars
+                setTimeout(() => {
+                    document.querySelectorAll('.sl-category-bar-fill').forEach(bar => {
+                        bar.style.width = bar.getAttribute('data-width');
+                    });
+                }, 300);
+
+                // --- Matched Skills (New) ---
+                const matchedSection = document.getElementById('matchedSkillsSection');
+                if (data.matched_skills && data.matched_skills.length > 0) {
+                    const skillsHtml = data.matched_skills.map(skill => 
+                        `<span class="sl-skill-tag sl-skill-match"><span class="sl-icon">✓</span> ${skill}</span>`
+                    ).join('');
+                    
+                    matchedSection.innerHTML = `
+                        <div class="sl-card-header">
+                            <div class="sl-icon-box success">✓</div>
+                            <h3>Matched Skills</h3>
+                            <span class="sl-badge-count">${data.matched_skills.length}</span>
+                        </div>
+                        <div class="sl-skills-cloud">
+                            ${skillsHtml}
+                        </div>
+                    `;
+                    matchedSection.style.display = 'block';
+                } else {
+                    matchedSection.style.display = 'none';
+                }
+
+                // --- Missing Skills ---
+                const missingSection = document.getElementById('missingSkillsSection');
+                if (data.missing_skills.length > 0) {
+                    const skillsHtml = data.missing_skills.map(skill => 
+                        `<span class="sl-skill-tag sl-skill-missing"><span class="sl-icon">×</span> ${skill}</span>`
+                    ).join('');
+                    
+                    missingSection.innerHTML = `
+                        <div class="sl-card-header">
+                            <div class="sl-icon-box warning">⚠️</div>
+                            <h3>Missing Skills</h3>
+                            <span class="sl-badge-count">${data.missing_skills.length}</span>
+                        </div>
+                        <div class="sl-skills-cloud">
+                            ${skillsHtml}
+                        </div>
+                    `;
+                    missingSection.style.display = 'block';
+                } else {
+                    missingSection.style.display = 'none';
+                }
+
+                // --- Suggestions ---
+                const suggestionsSection = document.getElementById('suggestionsSection');
+                if (data.suggestions.length > 0) {
+                    const suggestionsHtml = data.suggestions.map(sugg => `
+                        <div class="sl-suggestion-item">
+                            <div class="sl-suggestion-icon">💡</div>
+                            <p>${sugg}</p>
+                        </div>
+                    `).join('');
+
+                    suggestionsSection.innerHTML = `
+                        <div class="sl-card-header">
+                            <div class="sl-icon-box info">📝</div>
+                            <h3>AI Recommendations</h3>
+                        </div>
+                        <div class="sl-suggestions-list">
+                            ${suggestionsHtml}
+                        </div>
+                    `;
+                    suggestionsSection.style.display = 'block';
+                } else {
+                    suggestionsSection.style.display = 'none';
+                }
+            }
+            
+            // Animation Helper
+            function animateValue(id, start, end, duration) {
+                const obj = document.getElementById(id);
+                let startTimestamp = null;
+                const step = (timestamp) => {
+                    if (!startTimestamp) startTimestamp = timestamp;
+                    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                    obj.innerHTML = Math.floor(progress * (end - start) + start) + "%";
+                    if (progress < 1) {
+                        window.requestAnimationFrame(step);
+                    }
+                };
+                window.requestAnimationFrame(step);
+            }
+        });
+    </script>
+</body>
+</html>

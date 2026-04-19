@@ -1,0 +1,3 @@
+I am a computer science student skilled in Python, Pandas, NumPy and Machine Learning.
+I have done projects using Excel, Power BI and SQL.
+I know HTML, CSS and Git.

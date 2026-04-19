@@ -1,0 +1,2 @@
+We are hiring a Data Analyst with skills in Python, Pandas, SQL, Power BI, Machine Learning,
+Deep Learning, Tableau and Excel. Knowledge of GitHub and Linux is a plus.

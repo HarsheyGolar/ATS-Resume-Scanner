@@ -1,0 +1,354 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   SKILLLENS AI — Base CSS Foundation
+   Premium CSS Reset & Design System Variables
+   Performance-optimized for 120fps animations
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CSS Custom Properties (Design Tokens)
+   ───────────────────────────────────────────────────────────────────────────── */
+:root {
+  /* ═══ Color System ═══ */
+  /* Primary Background Palette */
+  --sl-bg-primary: #0a0a0f;
+  --sl-bg-secondary: #12121a;
+  --sl-bg-tertiary: #1a1a26;
+  --sl-bg-elevated: #1e1e2e;
+  --sl-bg-card: rgba(26, 26, 38, 0.7);
+  --sl-bg-glass: rgba(26, 26, 38, 0.4);
+  
+  /* Accent Colors - Electric Purple */
+  --sl-accent-primary: #8b5cf6;
+  --sl-accent-secondary: #a78bfa;
+  --sl-accent-tertiary: #c4b5fd;
+  --sl-accent-glow: rgba(139, 92, 246, 0.4);
+  --sl-accent-subtle: rgba(139, 92, 246, 0.1);
+  
+  /* Cyan Highlights */
+  --sl-cyan-primary: #06b6d4;
+  --sl-cyan-secondary: #22d3ee;
+  --sl-cyan-glow: rgba(6, 182, 212, 0.4);
+  --sl-cyan-subtle: rgba(6, 182, 212, 0.1);
+  
+  /* Gradient Definitions */
+  --sl-gradient-primary: linear-gradient(135deg, #8b5cf6 0%, #06b6d4 100%);
+  --sl-gradient-secondary: linear-gradient(135deg, #a78bfa 0%, #22d3ee 100%);
+  --sl-gradient-dark: linear-gradient(180deg, #12121a 0%, #0a0a0f 100%);
+  --sl-gradient-glow: linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(6, 182, 212, 0.2) 100%);
+  --sl-gradient-border: linear-gradient(135deg, rgba(139, 92, 246, 0.5), rgba(6, 182, 212, 0.5));
+  --sl-gradient-shine: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  
+  /* Text Colors */
+  --sl-text-primary: #f8fafc;
+  --sl-text-secondary: #94a3b8;
+  --sl-text-tertiary: #64748b;
+  --sl-text-muted: #475569;
+  
+  /* Semantic Colors */
+  --sl-success: #22c55e;
+  --sl-success-glow: rgba(34, 197, 94, 0.3);
+  --sl-warning: #f59e0b;
+  --sl-warning-glow: rgba(245, 158, 11, 0.3);
+  --sl-error: #ef4444;
+  --sl-error-glow: rgba(239, 68, 68, 0.3);
+  --sl-info: #3b82f6;
+  --sl-info-glow: rgba(59, 130, 246, 0.3);
+  
+  /* Score Colors */
+  --sl-score-excellent: #22c55e;
+  --sl-score-good: #84cc16;
+  --sl-score-average: #f59e0b;
+  --sl-score-poor: #ef4444;
+
+  /* ═══ Typography ═══ */
+  --sl-font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --sl-font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, monospace;
+  
+  /* Font Sizes - Fluid Typography */
+  --sl-text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --sl-text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+  --sl-text-base: clamp(1rem, 0.9rem + 0.5vw, 1.125rem);
+  --sl-text-lg: clamp(1.125rem, 1rem + 0.6vw, 1.25rem);
+  --sl-text-xl: clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem);
+  --sl-text-2xl: clamp(1.5rem, 1.2rem + 1.5vw, 2rem);
+  --sl-text-3xl: clamp(1.875rem, 1.4rem + 2.4vw, 2.5rem);
+  --sl-text-4xl: clamp(2.25rem, 1.6rem + 3.25vw, 3.5rem);
+  --sl-text-5xl: clamp(3rem, 2rem + 5vw, 5rem);
+  
+  /* Font Weights */
+  --sl-font-light: 300;
+  --sl-font-normal: 400;
+  --sl-font-medium: 500;
+  --sl-font-semibold: 600;
+  --sl-font-bold: 700;
+  
+  /* Line Heights */
+  --sl-leading-tight: 1.15;
+  --sl-leading-snug: 1.375;
+  --sl-leading-normal: 1.5;
+  --sl-leading-relaxed: 1.625;
+  
+  /* Letter Spacing */
+  --sl-tracking-tight: -0.025em;
+  --sl-tracking-normal: 0;
+  --sl-tracking-wide: 0.025em;
+  --sl-tracking-wider: 0.05em;
+
+  /* ═══ Spacing System ═══ */
+  --sl-space-1: 0.25rem;
+  --sl-space-2: 0.5rem;
+  --sl-space-3: 0.75rem;
+  --sl-space-4: 1rem;
+  --sl-space-5: 1.25rem;
+  --sl-space-6: 1.5rem;
+  --sl-space-8: 2rem;
+  --sl-space-10: 2.5rem;
+  --sl-space-12: 3rem;
+  --sl-space-16: 4rem;
+  --sl-space-20: 5rem;
+  --sl-space-24: 6rem;
+
+  /* ═══ Border Radius ═══ */
+  --sl-radius-sm: 0.375rem;
+  --sl-radius-md: 0.5rem;
+  --sl-radius-lg: 0.75rem;
+  --sl-radius-xl: 1rem;
+  --sl-radius-2xl: 1.5rem;
+  --sl-radius-3xl: 2rem;
+  --sl-radius-full: 9999px;
+
+  /* ═══ Shadows ═══ */
+  --sl-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --sl-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+  --sl-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+  --sl-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+  --sl-shadow-glow: 0 0 40px rgba(139, 92, 246, 0.3);
+  --sl-shadow-glow-lg: 0 0 60px rgba(139, 92, 246, 0.4), 0 0 100px rgba(6, 182, 212, 0.2);
+  --sl-shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+
+  /* ═══ Transitions - GPU Optimized ═══ */
+  --sl-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --sl-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --sl-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --sl-ease-bounce: cubic-bezier(0.68, -0.6, 0.32, 1.6);
+  
+  --sl-duration-fast: 150ms;
+  --sl-duration-normal: 250ms;
+  --sl-duration-slow: 400ms;
+  --sl-duration-slower: 600ms;
+
+  /* ═══ Z-Index Scale ═══ */
+  --sl-z-base: 1;
+  --sl-z-elevated: 10;
+  --sl-z-dropdown: 100;
+  --sl-z-modal: 1000;
+  --sl-z-tooltip: 1100;
+  --sl-z-max: 9999;
+
+  /* ═══ Blur Values ═══ */
+  --sl-blur-sm: 4px;
+  --sl-blur-md: 8px;
+  --sl-blur-lg: 16px;
+  --sl-blur-xl: 24px;
+  --sl-blur-2xl: 40px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   CSS Reset - Modern Minimal Reset
+   ───────────────────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  min-height: 100vh;
+  line-height: var(--sl-leading-normal);
+  font-family: var(--sl-font-primary);
+}
+
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+input, button, textarea, select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: var(--sl-font-semibold);
+  line-height: var(--sl-leading-tight);
+}
+
+p {
+  line-height: var(--sl-leading-relaxed);
+}
+
+/* Remove default focus styles, we'll add custom ones */
+:focus {
+  outline: none;
+}
+
+/* Custom focus-visible for accessibility */
+:focus-visible {
+  outline: 2px solid var(--sl-accent-primary);
+  outline-offset: 2px;
+}
+
+/* Selection styling */
+::selection {
+  background: var(--sl-accent-primary);
+  color: var(--sl-text-primary);
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--sl-bg-secondary);
+  border-radius: var(--sl-radius-full);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--sl-bg-elevated);
+  border-radius: var(--sl-radius-full);
+  border: 2px solid var(--sl-bg-secondary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--sl-accent-primary);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Performance Optimizations
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* GPU acceleration for animated elements */
+.sl-gpu {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Will-change optimization (apply sparingly) */
+.sl-will-transform {
+  will-change: transform;
+}
+
+.sl-will-opacity {
+  will-change: opacity;
+}
+
+/* Contain for layout performance */
+.sl-contain-layout {
+  contain: layout;
+}
+
+.sl-contain-paint {
+  contain: paint;
+}
+
+.sl-contain-strict {
+  contain: strict;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Utility Classes
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Flex utilities */
+.sl-flex { display: flex; }
+.sl-flex-col { flex-direction: column; }
+.sl-flex-center { align-items: center; justify-content: center; }
+.sl-flex-between { justify-content: space-between; }
+.sl-flex-wrap { flex-wrap: wrap; }
+.sl-gap-2 { gap: var(--sl-space-2); }
+.sl-gap-4 { gap: var(--sl-space-4); }
+.sl-gap-6 { gap: var(--sl-space-6); }
+.sl-gap-8 { gap: var(--sl-space-8); }
+
+/* Grid utilities */
+.sl-grid { display: grid; }
+.sl-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.sl-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.sl-grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+/* Spacing utilities */
+.sl-p-4 { padding: var(--sl-space-4); }
+.sl-p-6 { padding: var(--sl-space-6); }
+.sl-p-8 { padding: var(--sl-space-8); }
+.sl-m-auto { margin: auto; }
+.sl-mx-auto { margin-left: auto; margin-right: auto; }
+.sl-my-4 { margin-top: var(--sl-space-4); margin-bottom: var(--sl-space-4); }
+.sl-my-8 { margin-top: var(--sl-space-8); margin-bottom: var(--sl-space-8); }
+
+/* Text utilities */
+.sl-text-center { text-align: center; }
+.sl-text-gradient {
+  background: var(--sl-gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Visibility */
+.sl-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Container */
+.sl-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--sl-space-6);
+}
+
+@media (max-width: 768px) {
+  .sl-container {
+    padding: 0 var(--sl-space-4);
+  }
+  
+  .sl-grid-2, .sl-grid-3, .sl-grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
